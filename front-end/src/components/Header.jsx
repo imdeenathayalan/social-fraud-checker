@@ -1,6 +1,6 @@
 import { Instagram, Facebook, Twitter, Moon, Sun, History } from 'lucide-react'
 
-const Header = ({ isDarkMode, toggleDarkMode, currentView, setCurrentView, showHistoryButton }) => {
+const Header = ({ isDarkMode, toggleDarkMode, currentView, setCurrentView, showHistoryButton, onShowHistory }) => {
   return (
     <header className="header">
       <div className="container">
@@ -17,7 +17,7 @@ const Header = ({ isDarkMode, toggleDarkMode, currentView, setCurrentView, showH
           <div className="header-actions">
             {showHistoryButton && currentView !== 'history' && (
               <button
-                onClick={() => setCurrentView('history')}
+                onClick={onShowHistory}
                 className="history-btn"
               >
                 <History size={18} />

@@ -6,7 +6,7 @@ import HistoryPage from './components/HistoryPage'
 import { checkAccount, getHistory } from './services/api'
 import { useLocalStorage } from './hooks/useLocalStorage'
 import './App.css'
-import './index.css'
+
 function App() {
   const [currentView, setCurrentView] = useState('landing')
   const [isDarkMode, setIsDarkMode] = useLocalStorage('darkMode', false)
@@ -15,10 +15,11 @@ function App() {
   const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
+    // Apply dark mode class to document element
     if (isDarkMode) {
-      document.documentElement.classList.add('dark')
+      document.documentElement.setAttribute('data-theme', 'dark')
     } else {
-      document.documentElement.classList.remove('dark')
+      document.documentElement.removeAttribute('data-theme')
     }
   }, [isDarkMode])
 
