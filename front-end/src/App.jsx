@@ -3,25 +3,27 @@ import Header from './components/Header'
 import LandingPage from './components/LandingPage'
 import ResultsPage from './components/ResultsPage'
 import HistoryPage from './components/HistoryPage'
-import { checkAccount } from './services/api'
+import { checkAccount, getHistory } from './services/api'
 import { useLocalStorage } from './hooks/useLocalStorage'
+import './App.css'
 import './index.css'
-
 function App() {
   const [currentView, setCurrentView] = useState('landing')
   const [isDarkMode, setIsDarkMode] = useLocalStorage('darkMode', false)
   const [checkResult, setCheckResult] = useState(null)
   const [history, setHistory] = useLocalStorage('fraudCheckHistory', [])
+  const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
     if (isDarkMode) {
-      document.documentElement.setAttribute('data-theme', 'dark')
+      document.documentElement.classList.add('dark')
     } else {
-      document.documentElement.removeAttribute('data-theme')
+      document.documentElement.classList.remove('dark')
     }
   }, [isDarkMode])
 
   const handleCheckAccount = async (username, platform) => {
+    setIsLoading(true)
     try {
       const result = await checkAccount(username, platform)
       setCheckResult(result)
@@ -34,12 +36,22 @@ function App() {
         platform,
         result
       }
-      setHistory([newHistoryItem, ...history.slice(0, 9)]) // Keep only last 10 items
+      setHistory([newHistoryItem, ...history.slice(0, 9)])
       
       setCurrentView('results')
     } catch (error) {
       console.error('Error checking account:', error)
-      alert('Failed to check account. Please try again.')
+      alert(error.message || 'Failed to check account. Please try again.')
+    }
+    setIsLoading(false)
+  }
+
+  const loadHistory = async () => {
+    try {
+      const historyData = await getHistory()
+      setHistory(historyData)
+    } catch (error) {
+      console.error('Error loading history:', error)
     }
   }
 
@@ -50,13 +62,13 @@ function App() {
   const renderView = () => {
     switch (currentView) {
       case 'landing':
-        return <LandingPage onCheckAccount={handleCheckAccount} />
+        return <LandingPage onCheckAccount={handleCheckAccount} isLoading={isLoading} />
       case 'results':
         return <ResultsPage result={checkResult} onBack={() => setCurrentView('landing')} />
       case 'history':
         return <HistoryPage history={history} onBack={() => setCurrentView('landing')} />
       default:
-        return <LandingPage onCheckAccount={handleCheckAccount} />
+        return <LandingPage onCheckAccount={handleCheckAccount} isLoading={isLoading} />
     }
   }
 
@@ -68,6 +80,10 @@ function App() {
         currentView={currentView}
         setCurrentView={setCurrentView}
         showHistoryButton={history.length > 0}
+        onShowHistory={() => {
+          loadHistory()
+          setCurrentView('history')
+        }}
       />
       <main className="main-content">
         <div className="container">
